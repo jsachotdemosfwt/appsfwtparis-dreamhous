@@ -1,6 +1,7 @@
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
+var fileUpload = require('express-fileupload');
 var pg = require('pg');
 
 var app = express();
@@ -8,8 +9,10 @@ var app = express();
 app.use(express.static('www'));
 app.use(express.static(path.join('www', 'build')));
 
+app.use(fileUpload());
 app.use(bodyParser.json());
 
+var dreamhouseEinsteinVisionUrl = process.env.EINSTEIN_VISION_URL;
 
 var connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/dreamhouse';
 
@@ -43,10 +46,37 @@ client.query('SELECT * FROM salesforce.broker__c', function(error, data) {
   }
 });
 
+function getAllProperties(callback) {
+  client.query('SELECT * FROM ' + propertyTable, function(error, data) {
+    callback(data.rows);
+  });
+}
+
+var propertiesWithProbabilities = [];
+
+// get the property style for each property from the Dreamhouse Einstein Vision service
+getAllProperties(function(properties) {
+  propertiesWithProbabilities = properties;
+
+  propertiesWithProbabilities.forEach(function(property) {
+    var url = dreamhouseEinsteinVisionUrl + "/predict-from-url?sampleLocation=" + property.picture__c;
+
+    require('request').post({url: url}, function (err, httpResponse, body) {
+      try {
+        var json = JSON.parse(body);
+        property.probabilities = json.probabilities;
+      }
+      catch (error) {
+        property.probabilities = [];
+      }
+    });
+  });
+});
+
 
 app.get('/property', function(req, res) {
-  client.query('SELECT * FROM ' + propertyTable, function(error, data) {
-    res.json(data.rows);
+  getAllProperties(function(properties) {
+    res.json(properties);
   });
 });
 
@@ -85,6 +115,57 @@ app.get('/broker', function(req, res) {
 app.get('/broker/:sfid', function(req, res) {
   client.query('SELECT * FROM ' + brokerTable + ' WHERE sfid = $1', [req.params.sfid], function(error, data) {
     res.json(data.rows[0]);
+  });
+});
+
+app.post('/search', function(req, res) {
+  var url = dreamhouseEinsteinVisionUrl + "/predict";
+
+  var formData = {
+    filename: req.files.image.name,
+    sampleContent: {
+      value: req.files.image.data,
+      options: {
+        filename: req.files.image.name,
+        contentType: req.files.image.mimetype
+      }
+    }
+  };
+
+  require('request').post({url: url, formData: formData}, function(err, httpResponse, body) {
+    if (err) {
+      console.err(err);
+      res.send(err);
+    }
+    else {
+      var json = JSON.parse(body);
+
+      // find the properties that most closely match the predictions
+      var predictionsWithScores = propertiesWithProbabilities.map(function(property) {
+        var score = property.probabilities.reduce(function(acc, val) {
+
+          var propertyProbability = val.probability;
+          var uploadProbability = json.probabilities.find(function(probability) { return probability.label == val.label }).probability;
+
+          return acc + Math.pow(propertyProbability + uploadProbability, 2);
+        }, 0);
+        property.score = score;
+
+        return property;
+      });
+
+      predictionsWithScores.sort(function(a, b) {
+        if (a.score > b.score) {
+          return -1;
+        }else if (a.score < b.score) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+
+      res.send(predictionsWithScores.slice(0, 5));
+    }
   });
 });
 
