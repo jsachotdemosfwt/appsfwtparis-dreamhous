@@ -134,7 +134,7 @@ app.post('/search', function(req, res) {
 
   require('request').post({url: url, formData: formData}, function(err, httpResponse, body) {
     if (err) {
-      console.err(err);
+      console.log(err);
       res.send(err);
     }
     else {
