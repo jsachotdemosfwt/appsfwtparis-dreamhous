@@ -35,7 +35,7 @@ class MyApp {
             {title: 'Bienvenue', component: WelcomePage, icon: "bookmark"},
             {title: 'Maisons', component: PropertyListPage, icon: "home"},
             {title: 'Agents immobiliers', component: BrokerListPage, icon: "people"},
-            {title: 'Favoris', component: FavoriteListPage, icon: "star"}
+            {title: 'Favoris', component: FavoriteListPage, icon: "star"},
             {title: 'Einstein Vision', component: PhotoSearchPage, icon: "search"}
 
         ];
