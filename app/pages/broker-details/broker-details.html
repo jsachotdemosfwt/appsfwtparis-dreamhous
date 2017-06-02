@@ -2,7 +2,7 @@
     <button menuToggle>
         <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Broker</ion-title>
+    <ion-title>Agents immobiliers</ion-title>
 </ion-navbar>
 
 <ion-content class="broker">
@@ -17,17 +17,17 @@
             <ion-list>
                 <a href="tel:{{broker.Phone__c}}" ion-item>
                     <ion-icon name="call" item-left></ion-icon>
-                    <p>Call Office</p>
+                    <p>Fixe</p>
                     <h2>{{broker.phone}}</h2>
                 </a>
                 <a href="tel:{{broker.phone}}" ion-item>
                     <ion-icon name="call" item-left></ion-icon>
-                    <p>Call Mobile</p>
+                    <p>Mobile</p>
                     <h2>{{broker.mobilePhone}}</h2>
                 </a>
                 <a href="tel:{{broker.phone}}" ion-item>
                     <ion-icon name="text" item-left></ion-icon>
-                    <p>Text</p>
+                    <p>Message</p>
                     <h2>{{broker.mobilePhone}}</h2>
                 </a>
                 <a href="mailto:{{broker.email}}" ion-item>

@@ -4,28 +4,28 @@
 
   <ion-content>
     <ion-list>
-      <ion-list-header>Home Search</ion-list-header>
+      <ion-list-header>Recherche de maisons</ion-list-header>
       <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
         <ion-icon item-left name="{{p.icon}}"></ion-icon>
         {{p.title}}
       </button>
-      <ion-list-header>Mortgage</ion-list-header>
+      <ion-list-header>Emprunts</ion-list-header>
       <button menuClose ion-item >
         <ion-icon item-left name="checkbox"></ion-icon>
-        Get Pre-Approved
+        Simulation emprunts
       </button>
       <button menuClose ion-item >
         <ion-icon item-left name="cart"></ion-icon>
-        Shop Rates
+        Taux emprunts
       </button>
-      <ion-list-header>Account</ion-list-header>
+      <ion-list-header>Compte</ion-list-header>
       <button menuClose ion-item >
         <ion-icon item-left name="person"></ion-icon>
-        Profile
+        Profil
       </button>
       <button menuClose ion-item >
         <ion-icon item-left name="settings"></ion-icon>
-        Settings
+        Paramètres
       </button>
     </ion-list>
   </ion-content>
